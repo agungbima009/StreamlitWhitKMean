@@ -1,0 +1,8 @@
+streamlit
+pandas
+sqlalchemy
+scikit-learn
+bcrypt
+plotly
+matplotlib
+seaborn
