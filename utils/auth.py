@@ -33,9 +33,26 @@ def is_strong_password(password):
     return True
 
 # Login form
+import streamlit as st
+import bcrypt
+import json
+
+def load_config():
+    with open("config.json", "r") as f:
+        return json.load(f)
+
+def save_config(config):
+    with open("config.json", "w") as f:
+        json.dump(config, f, indent=4)
+
+
+# ====================
+# Fungsi Login Utama
+# ====================
 def login():
     config = load_config()
 
+    # Inisialisasi session state
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
     if 'show_reset' not in st.session_state:
@@ -50,37 +67,59 @@ def login():
         password = st.text_input("Password", type="password")
 
         if st.button("Login"):
-            if username == config.get("username") and bcrypt.checkpw(password.encode(), config.get("password").encode()):
+            if (
+                username == config.get("username")
+                and bcrypt.checkpw(password.encode(), config.get("password").encode())
+            ):
                 st.session_state.authenticated = True
                 st.session_state.login_failed = False
+                st.session_state.show_reset = False
+                st.success("✅ Login berhasil!")
                 st.rerun()
             else:
                 st.session_state.login_failed = True
                 st.error("❌ Username atau password salah.")
 
-        # Hanya muncul jika login gagal
+        # ========================
+        # 🔐 Bagian Reset Password
+        # ========================
         if st.session_state.login_failed and not st.session_state.show_reset:
             if st.button("Lupa Password"):
                 st.session_state.show_reset = True
 
         if st.session_state.show_reset:
-            st.info("Jawab pertanyaan rahasia untuk reset password.")
-            question = config.get("security_question")
-            answer = st.text_input("Pertanyaan:", placeholder=question)
+            st.info("🔐 Jawab pertanyaan rahasia untuk reset password.")
+
+            question = config.get("security_question", "Pertanyaan tidak tersedia")
+            answer = st.text_input(f"{question}")
             new_pass = st.text_input("Password Baru", type="password")
+
             if st.button("Ganti Password"):
-                if answer.lower() == config.get("security_answer").lower():
-                    new_hash = bcrypt.hashpw(new_pass.encode(), bcrypt.gensalt()).decode()
-                    config["password"] = new_hash
-                    with open("config.json", "w") as f:
-                        json.dump(config, f)
-                    st.success("✅ Password berhasil diganti!")
-                    st.session_state.show_reset = False
-                    st.session_state.login_failed = False
+                stored_hashed_answer = config.get("security_answer")
+
+                # Validasi apakah security_answer ada
+                if not stored_hashed_answer:
+                    st.error("⚠️ Pertanyaan keamanan belum diset pada konfigurasi.")
                 else:
-                    st.error("❌ Jawaban salah.")
+                    if bcrypt.checkpw(answer.encode(), stored_hashed_answer.encode()):
+                        if len(new_pass) < 8:
+                            st.warning("⚠️ Password harus minimal 8 karakter.")
+                            return
+
+                        # Hash password baru
+                        new_hash = bcrypt.hashpw(new_pass.encode(), bcrypt.gensalt()).decode()
+
+                        config["password"] = new_hash
+                        save_config(config)
+
+                        st.success("✅ Password berhasil diganti! Silakan login kembali.")
+                        st.session_state.show_reset = False
+                        st.session_state.login_failed = False
+                    else:
+                        st.error("❌ Jawaban pertanyaan keamanan salah.")
 
         return False
+
     else:
         return True
 
@@ -95,18 +134,25 @@ def show_password_reset_form():
     new_pass = st.text_input("Password Baru", type="password")
 
     if st.button("Ganti Password"):
-        if jawaban_input.strip().lower() == config.get("security_answer", "").strip().lower():
+        stored_hashed_answer = config.get("security_answer", "")
+
+        if bcrypt.checkpw(jawaban_input.strip().encode(), stored_hashed_answer.encode()):
             if not is_strong_password(new_pass):
-                st.warning("Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan simbol.")
+                st.warning("⚠️ Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan simbol.")
                 return
+
+            # Simpan password baru dengan hashing
             config["password"] = bcrypt.hashpw(new_pass.encode(), bcrypt.gensalt()).decode()
             save_config(config)
-            st.success("Password berhasil diubah! Silakan login kembali.")
-            # Reset semua flag
+
+            st.success("✅ Password berhasil diubah! Silakan login kembali.")
+
+            # Reset flag session
             st.session_state.show_reset = False
             st.session_state.show_reset_button = False
+
         else:
-            st.error("Jawaban pertanyaan salah.")
+            st.error("❌ Jawaban pertanyaan keamanan salah.")
 
 # Logout
 def logout():

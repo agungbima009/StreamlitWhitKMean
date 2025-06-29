@@ -1,1 +1,6 @@
-{"username": "admin", "password": "$2b$12$u7yQNfe6p93rcm/0iPMUtejIbJPHJOgpuxX/1HWt5KkJCc8W5HYUa", "security_question": "Nama hewan peliharaan pertama Anda?", "security_answer": "nalakucinglucu"}
+{
+    "username": "admin",
+    "password": "$2b$12$kUz0oZpa/Utyu7TV/wGazOGySvTkE457J1ZqfbwBgV2npXI5f.4n2",
+    "security_question": "Nama hewan peliharaan pertama Anda?",
+    "security_answer": "$2b$12$YZnmM72z4wGc0q6cS9WyG.UV70xYnX9lIbpSSGWZWRAF51SSZ3BSO"
+}
