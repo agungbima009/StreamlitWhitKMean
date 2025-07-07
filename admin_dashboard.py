@@ -278,6 +278,17 @@ def render():
                             with engine.begin() as conn:
                                 conn.execute(text("UPDATE uploaded_files SET file_name = :name WHERE id = :id"), {"name": new_name, "id": row['id']})
                             st.rerun()
+                    with col3:
+                        new_date = st.date_input("Ubah Tanggal Upload", value=pd.to_datetime(row['uploaded_at']).date(), key=f"date_{row['id']}")
+                        if st.button("Simpan Tanggal Baru", key=f"save_date_{row['id']}"):
+                            new_datetime = datetime.combine(new_date, pd.to_datetime(row['uploaded_at']).time())
+                            with engine.begin() as conn:
+                                conn.execute(text("UPDATE uploaded_files SET uploaded_at = :date WHERE id = :id"), {
+                                    "date": new_datetime.isoformat(),
+                                    "id": row['id']
+                                })
+                            st.success("✅ Tanggal upload berhasil diperbarui.")
+                            st.rerun()
 
             if show_all:
                 st.markdown("</div>", unsafe_allow_html=True)
