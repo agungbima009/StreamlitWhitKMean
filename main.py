@@ -22,12 +22,12 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
 
     .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0f2027 0%, #2c5364 50%, #00b4db 100%);
         font-family: 'Inter', sans-serif;
     }
 
     .stApp header {
-        background: linear-gradient(90deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #0f2027 0%, #2c5364 50%, #00b4db 100%);
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
     }

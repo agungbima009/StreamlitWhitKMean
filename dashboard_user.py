@@ -5,6 +5,8 @@ from utils.db import init_db, engine
 from utils.preprocessing import preprocess
 from utils.visualizations import show_scorecard, show_clustermap, show_top_bottom_locations, show_price_trend, show_data_table
 import pickle
+from sqlalchemy import text
+
 
 model = pickle.load(open("models/kmeans_model.pkl", "rb"))
 
@@ -13,6 +15,10 @@ init_db()
 def load_dataset(file_id):
     return pd.read_sql_table(f"dataset_{file_id}", con=engine)
 
+def load_cluster_labels():
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT cluster_id, label FROM cluster_labels"))
+    return {row[0]: row[1] for row in result} if result else {0: "Tinggi", 1: "Sedang", 2: "Rendah"}
 
 def render():
     st.markdown(
@@ -44,6 +50,9 @@ def render():
     df_clean = preprocess(df)
     df_clean["cluster"] = model.predict(df_clean[["RataRataHarga", "RataRataHargaTertinggiDiPasar"]])
 
+    label_map = load_cluster_labels()
+    df_clean["label"] = df_clean["cluster"].map(label_map)
+
     # Filter Cluster di Sidebar
     cluster_options = sorted(df_clean["cluster"].unique())
     selected_cluster = st.sidebar.multiselect("Pilih Cluster:", options=cluster_options, default=cluster_options)
@@ -58,7 +67,7 @@ def render():
     ]
 
     show_scorecard(filtered_df)
-    show_clustermap(filtered_df)
+    show_clustermap(filtered_df, label_map)
     show_top_bottom_locations(filtered_df)
     show_price_trend()
     show_data_table(filtered_df)
