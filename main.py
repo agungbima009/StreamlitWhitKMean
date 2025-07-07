@@ -32,12 +32,6 @@ st.markdown("""
         backdrop-filter: blur(10px);
     }
 
-    [data-testid="stSidebar"] {
-        background-color: rgba(33, 33, 33, 0.9);
-        border-right: 1px solid rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-    }
-
     .sidebar-title {
         color: white;
         font-size: 1.6rem;
@@ -87,7 +81,26 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.3);
         border-radius: 10px;
     }
+    
+     /* Sinkronisasi sidebar dengan gradient utama */
+    [data-testid="stSidebar"] > div:first-child {
+        background: linear-gradient(135deg,
+            rgba(30, 60, 114, 0.3) 0%,
+            rgba(42, 82, 152, 0.25) 50%,
+            rgba(161, 196, 253, 0.15) 100%);
+        backdrop-filter: blur(12px);
+        border-right: 1px solid rgba(161, 196, 253, 0.3);
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
+        color: white;
+    }
 
+    /* Opsional: memperbaiki warna teks & link sidebar */
+    [data-testid="stSidebar"] .css-1v3fvcr,
+    [data-testid="stSidebar"] .css-10trblm,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] span {
+        color: white !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
